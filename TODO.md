@@ -16,16 +16,16 @@
 - [ x ] Create `App\Enums\Role` enum (admin/responder/viewer)
 - [ x ] Seed 3 users (admin/responder/viewer)
 - [ x ] Add `Gate::before` admin override
-- [ ] Create Policies scaffold for core models
+- [ x ] Create Policies scaffold for core models
 
 ### Core Domain (models + migrations)
-- [ ] Create models + migrations:
-  - [ ] `Service`
-  - [ ] `Incident`
-  - [ ] `IncidentUpdate`
-  - [ ] `Attachment`
-  - [ ] `Subscription`
-- [ ] Define relationships and key columns (status/severity/etc.)
+- [ x ] Create models + migrations:
+  - [ x ] `Service`
+  - [ x ] `Incident`
+  - [ x ] `IncidentUpdate`
+  - [ x ] `Attachment`
+  - [ x ] `Subscription`
+- [ x ] Define relationships and key columns (status/severity/etc.)
 - [ ] Run migrations + seed sample Services/Incidents
 - [ ] Verify relationships in Tinker
 

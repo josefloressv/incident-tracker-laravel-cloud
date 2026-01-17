@@ -346,3 +346,180 @@ php artisan route:list --path=services && php artisan model:show Service
 # Check event wiring
 php artisan event:list | grep Incident
 ```
+
+## Database Schema & Models
+
+📊 **[View full database schema diagram](docs/database-schema.md)**
+
+### Core Models
+
+This app uses 5 core models to track services and incidents:
+
+| Model | Purpose | Key Relationships |
+|-------|---------|------------------|
+| **Service** | Systems/services being monitored | Has many incidents, polymorphic subscriptions |
+| **Incident** | Active issues/outages | Belongs to service, has updates and attachments |
+| **IncidentUpdate** | Timeline entries for incidents | Belongs to incident, can have attachments |
+| **Attachment** | File uploads (S3-compatible) | Polymorphic: belongs to incident or update |
+| **Subscription** | User notifications | Polymorphic: subscribe to service or incident |
+
+### Creating Models & Migrations
+
+```bash
+# Generate model + migration in one command
+php artisan make:model Service -m
+php artisan make:model Incident -m
+php artisan make:model IncidentUpdate -m
+php artisan make:model Attachment -m
+php artisan make:model Subscription -m
+```
+
+### Migration Schema Details
+
+**Services Table:**
+- `name`, `slug` (unique), `description`, `status` (active/maintenance/deprecated)
+- `owner_id` → users (nullable)
+- Indexed: `status`
+
+**Incidents Table:**
+- `title`, `description`, `status` (open/investigating/mitigating/monitoring/resolved)
+- `severity` (p1/p2/p3/p4), `resolved_at` (timestamp)
+- `service_id` → services, `created_by` → users
+- Indexed: `status`, `severity`, `created_at`
+
+**Incident Updates Table:**
+- `message`, `status` (nullable, for status changes)
+- `incident_id` → incidents, `created_by` → users
+- Indexed: `incident_id`, `created_at`
+
+**Attachments Table (Polymorphic):**
+- `attachable_type`, `attachable_id` (morphs to incident or update)
+- `uploaded_by` → users
+- File metadata: `original_name`, `mime_type`, `size_bytes`, `disk`, `path`
+- Auto-indexed on polymorphic columns
+
+**Subscriptions Table (Polymorphic):**
+- `subscribable_type`, `subscribable_id` (morphs to service or incident)
+- `user_id` → users
+- Unique constraint: `[user_id, subscribable_type, subscribable_id]`
+- Auto-indexed on polymorphic columns
+
+### Running Migrations
+
+```bash
+# Run all pending migrations
+php artisan migrate
+
+# Fresh migration (drops all tables, re-runs migrations)
+php artisan migrate:fresh
+
+# Check migration status
+php artisan migrate:status
+
+# Rollback last batch
+php artisan migrate:rollback
+```
+
+### Important Notes
+
+⚠️ **Polymorphic Indexes:** Laravel's `morphs()` method automatically creates indexes on `type` + `id` columns. Don't add duplicate indexes manually or you'll get this error:
+```
+index <table>_<name>_type_<name>_id_index already exists
+```
+
+✅ **Cloud Storage:** Attachments use `disk` + `path` columns for S3/R2 compatibility. Don't rely on local disk persistence in production.
+
+---
+
+## Authorization Policies
+
+All models are protected by policies that enforce role-based access control. Policies centralize authorization logic and integrate with Laravel's `Gate` facade and `@can` Blade directives.
+
+### Creating Policies
+
+```bash
+php artisan make:policy ServicePolicy --model=Service
+php artisan make:policy IncidentPolicy --model=Incident
+php artisan make:policy IncidentUpdatePolicy --model=IncidentUpdate
+php artisan make:policy AttachmentPolicy --model=Attachment
+php artisan make:policy SubscriptionPolicy --model=Subscription
+```
+
+### Policy Rules Summary
+
+| Policy | viewAny / view | create | update | delete |
+|--------|---------------|--------|--------|--------|
+| **Service** | All users ✅ | Admin/Responder | Admin/Responder | Admin only |
+| **Incident** | All users ✅ | Admin/Responder | Admin/Responder | Admin only |
+| **IncidentUpdate** | All users ✅ | Admin/Responder | Admin/Responder | Admin only |
+| **Attachment** | All users ✅ | Admin/Responder | Admin only | Admin or uploader |
+| **Subscription** | All users ✅ | All users ✅ | Owner or Admin | Owner or Admin |
+
+### Policy Implementation Details
+
+**ServicePolicy, IncidentPolicy, IncidentUpdatePolicy:**
+- All authenticated users can view (read-only access for viewers)
+- Admins and responders can create and update
+- Only admins can delete
+
+**AttachmentPolicy:**
+- All authenticated users can view/download
+- Admins and responders can upload
+- Admins or the original uploader can delete their own attachments
+- Only admins can update metadata
+
+**SubscriptionPolicy:**
+- All authenticated users can subscribe/unsubscribe
+- Users can only manage their own subscriptions
+- Admins can manage any subscription
+
+### Usage Examples
+
+**In Controllers:**
+```php
+// Authorize before showing create form
+public function create()
+{
+    $this->authorize('create', Incident::class);
+    return view('incidents.create');
+}
+
+// Authorize before updating
+public function update(Request $request, Incident $incident)
+{
+    $this->authorize('update', $incident);
+    $incident->update($request->validated());
+    return redirect()->route('incidents.show', $incident);
+}
+```
+
+**In Blade Templates:**
+```blade
+{{-- Show create button only if authorized --}}
+@can('create', App\Models\Incident::class)
+    <a href="{{ route('incidents.create') }}">Create Incident</a>
+@endcan
+
+{{-- Show edit button only if authorized --}}
+@can('update', $incident)
+    <a href="{{ route('incidents.edit', $incident) }}">Edit</a>
+@endcan
+
+{{-- Show delete button only if authorized --}}
+@can('delete', $incident)
+    <form method="POST" action="{{ route('incidents.destroy', $incident) }}">
+        @csrf @method('DELETE')
+        <button>Delete</button>
+    </form>
+@endcan
+```
+
+**Admin Override:**
+
+Admins automatically bypass all policy checks via `Gate::before()` in [AuthServiceProvider.php](app/Providers/AuthServiceProvider.php):
+
+```php
+Gate::before(function (User $user, string $ability) {
+    return $user->isAdmin() ? true : null;
+});
+```
