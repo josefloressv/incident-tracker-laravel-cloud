@@ -5,17 +5,17 @@
 
 ## Day 1 Checklist (Build the foundation)
 ### Setup
-- [ ] Create Laravel 9 app repo
-- [ ] Configure `.env` (DB, APP_URL)
-- [ ] Install **Laravel Breeze (Blade)** and build assets
-- [ ] Run migrations
-- [ ] Verify auth flows: register/login/logout
+- [ x ] Create Laravel 9 app repo
+- [ x ] Configure `.env` (DB, APP_URL)
+- [ x ] Install **Laravel Breeze (Blade)** and build assets
+- [ x ] Run migrations
+- [ x ] Verify auth flows: register/login/logout
 
 ### Roles + Authorization
-- [ ] Add `role` to `users` table (string/enum)
-- [ ] Create `App\Enums\Role` enum (admin/responder/viewer)
-- [ ] Seed 3 users (admin/responder/viewer)
-- [ ] Add `Gate::before` admin override
+- [ x ] Add `role` to `users` table (string/enum)
+- [ x ] Create `App\Enums\Role` enum (admin/responder/viewer)
+- [ x ] Seed 3 users (admin/responder/viewer)
+- [ x ] Add `Gate::before` admin override
 - [ ] Create Policies scaffold for core models
 
 ### Core Domain (models + migrations)
