@@ -208,6 +208,15 @@ pecl install sqlite3  # If needed
 chmod -R 775 storage bootstrap/cache
 ```
 
+### storage/logs/laravel.log: No such file or directory
+```bash
+# Laravel only creates storage/logs/laravel.log after it logs something
+# Force Laravel to write a log entry
+php artisan tinker --execute="\\Log::debug('log test');"
+
+# validate
+tail -f storage/logs/laravel.log
+```
 ---
 
 > **Note:** This workflow avoids conflicts with the existing git repository and preserves custom documentation files while installing Laravel 9 fresh.
