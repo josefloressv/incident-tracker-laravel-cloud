@@ -49,3 +49,24 @@ cp .env.example .env
 php artisan key:generate
 npm install
 npm run dev
+```
+
+## Authentication Scaffolding (Laravel Breeze)
+
+This project uses **Laravel Breeze (Blade + Tailwind + Vite)** for the default authentication UI and routes (login, register, password reset).
+
+### Why Breeze
+- Fastest starter kit for a Laravel 9 POC
+- Uses Blade views (server-rendered) and keeps the stack simple
+- Includes Tailwind + Vite dev workflow out of the box
+
+### Install Breeze (Blade)
+```bash
+composer require laravel/breeze --dev
+php artisan breeze:install blade
+
+npm install
+npm run dev
+
+php artisan migrate
+```
