@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\Role;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -21,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -40,5 +42,38 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'role' => Role::class,
     ];
+
+    /**
+     * Check if the user is an admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === Role::ADMIN;
+    }
+
+    /**
+     * Check if the user is a responder.
+     */
+    public function isResponder(): bool
+    {
+        return $this->role === Role::RESPONDER;
+    }
+
+    /**
+     * Check if the user is a viewer.
+     */
+    public function isViewer(): bool
+    {
+        return $this->role === Role::VIEWER;
+    }
+
+    /**
+     * Check if the user can write (create/update content).
+     */
+    public function canWrite(): bool
+    {
+        return $this->role->canWrite();
+    }
 }
