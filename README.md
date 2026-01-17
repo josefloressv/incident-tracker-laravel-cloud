@@ -23,20 +23,24 @@ This POC is designed to be cloud-friendly (managed DB, cache, object storage, qu
 - Basic metrics (MTTA/MTTR)
 
 ## Tech Stack
-- Laravel 9
-- PHP 8.2+
-- Database: Postgres or MySQL
-- Cache/Queue: Redis-compatible (Valkey/Redis)
-- Object Storage: S3-compatible (e.g., Cloudflare R2)
+- **Framework:** Laravel 9
+- **PHP:** 8.2+ (tested with 8.2.30)
+- **Frontend:** Blade + Tailwind CSS
+- **Node:** 22.x LTS (tested with 22.22.0)
+- **Database:** PostgreSQL or MySQL (SQLite for local dev)
+- **Cache/Queue:** Redis-compatible (Valkey/Redis)
+- **Object Storage:** S3-compatible (Cloudflare R2 recommended)
 
 ## Local Setup
 
 ### Requirements
-- PHP 8.2+
-- Composer
-- Node.js + npm
-- A local database (Postgres or MySQL)
-- Redis (optional but recommended)
+- PHP 8.2+ with extensions: mbstring, xml, bcmath, pdo, pdo_mysql/pdo_pgsql
+- Composer 2.x (tested with 2.9.3)
+- Node.js 22.x + npm 10.x
+- A local database (SQLite/PostgreSQL/MySQL)
+- Redis (optional for local, required for production queues)
+
+> **📋 Need to install or verify these tools?** See [PREWORK.md](PREWORK.md) for detailed macOS setup instructions.
 
 ### Install
 ```bash
