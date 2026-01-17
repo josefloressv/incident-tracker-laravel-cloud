@@ -252,3 +252,97 @@ php artisan view:clear
 
 ### Vite not connecting
 Make sure `npm run dev` is running in a separate terminal.
+
+## Laravel Diagnostics & Inspection (Read-Only Commands)
+
+These commands **inspect** your Laravel app without modifying code or data. Safe to run anytime.
+
+### System & Environment
+
+```bash
+# Laravel version
+php artisan --version
+
+# System overview (Laravel, PHP, drivers, cache, queue)
+php artisan about
+
+# Show current environment (local/production/etc)
+php artisan env
+
+# Verify PHP extensions
+php -m | grep -E "pdo|sqlite|mysql|redis"
+
+# Show composer packages with versions
+composer show
+composer show --tree  # with dependencies
+```
+
+### Routes & Application Structure
+
+```bash
+# List all registered routes
+php artisan route:list
+
+# Filter routes by name/path/method
+php artisan route:list --path=api
+php artisan route:list --method=POST
+php artisan route:list --name=incidents
+
+# List available Artisan commands
+php artisan list
+
+# Show command help
+php artisan help migrate
+```
+
+### Database & Models
+
+```bash
+# Check migration status
+php artisan migrate:status
+
+# Show model details (columns, relations, observers)
+php artisan model:show User
+php artisan model:show App\\Models\\Incident
+
+# Quick database check via tinker
+php artisan tinker --execute="dump(App\Models\User::count());"
+```
+
+### Events, Jobs & Scheduling
+
+```bash
+# List registered events and listeners
+php artisan event:list
+
+# Show scheduled tasks (cron)
+php artisan schedule:list
+
+# List queued jobs (requires queue driver configured)
+php artisan queue:failed
+```
+
+### Configuration & Cache
+
+```bash
+# Inspect effective config values
+php artisan config:show database
+php artisan config:show cache
+php artisan config:show queue
+
+# View all compiled config
+php artisan config:show
+```
+
+### Useful Combinations
+
+```bash
+# Full system check
+php artisan about && php artisan migrate:status
+
+# Verify routes and models exist
+php artisan route:list --path=services && php artisan model:show Service
+
+# Check event wiring
+php artisan event:list | grep Incident
+```
